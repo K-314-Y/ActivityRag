@@ -115,12 +115,13 @@ foreach(string pdfFile in pdfFiles)
     Console.WriteLine();
     Console.WriteLine($"PDFチャンクを{pdfChunks.Count}件作成しました");
 
+}
 
-    foreach (PdfChunk chunk in pdfChunks)
+foreach (PdfChunk chunk in pdfChunks)
     {
         try
         {
-            Console.WriteLine($"PDFの{chunk.PageNumber}ページ目をEmbedding化しています...");
+            Console.WriteLine($"{chunk.FileName} :{chunk.PageNumber}ページ目をEmbedding化しています...");
 
             OpenAIEmbedding embedding = await embeddingClient.GenerateEmbeddingAsync(chunk.Content);
 
@@ -128,25 +129,35 @@ foreach(string pdfFile in pdfFiles)
 
             EmbeddedPdfChunk embeddedChunk = new()
             {
-                Chunk = chunk,Embedding = vector
+                Chunk = chunk,
+                Embedding = vector
             };
 
             embeddedPdfChunks.Add(embeddedChunk);
-            Console.WriteLine($"{chunk.PageNumber}ページ目:{vector.Length}次元");
+            Console.WriteLine($"{chunk.FileName} :{chunk.PageNumber}ページ目:{vector.Length}次元");
 
         }
         catch(Exception ex)
         {
-            Console.WriteLine($"{chunk.PageNumber}ページ目のEmbedding化に失敗しました。");
+            Console.WriteLine($"{chunk.FileName} :{chunk.PageNumber}ページ目のEmbedding化に失敗しました。");
             Console.WriteLine($"エラーの内容:{ex.Message}");
         }
 
     }
-
     Console.WriteLine();
     Console.WriteLine($"PDFのEmbeddingを{embeddedPdfChunks.Count}件作成しました。");
-}
-    
+
+string cacheDirectory = Path.Combine("Data", "cache");
+
+Directory.CreateDirectory(cacheDirectory);
+
+string cacheFilePath = Path.Combine(cacheDirectory, "pdf_embeddings.json");
+
+string cacheJson = JsonSerializer.Serialize(embeddedPdfChunks);
+
+File.WriteAllText(cacheFilePath, cacheJson);
+
+Console.WriteLine($"Embeddingを保存しました：{cacheFilePath}");
 /*string? wikiHtml = null;
 
 try
@@ -326,7 +337,7 @@ while(true)
     {
         double pdfSimilarity = CaculateCosineSimilarity(embeddedPdfChunk.Embedding,questionVector);
 
-        Console.WriteLine($"PDF{embeddedPdfChunk.Chunk.PageNumber}ページ目との類似度:{pdfSimilarity:F4}");
+        Console.WriteLine($"{embeddedPdfChunk.Chunk.FileName}/PDF{embeddedPdfChunk.Chunk.PageNumber}ページ目との類似度:{pdfSimilarity:F4}");
 
         pdfResults.Add((embeddedPdfChunk, pdfSimilarity));
     }
@@ -338,7 +349,7 @@ while(true)
 
     foreach(var result in topPdfResults)
     {
-        Console.WriteLine($"PDF{result.PdfChunk.Chunk.PageNumber}ページ目 類似度:{result.Similarity:F4}");
+        Console.WriteLine($"{result.PdfChunk.Chunk.FileName}/PDF{result.PdfChunk.Chunk.PageNumber}ページ目 類似度:{result.Similarity:F4}");
     }
 
     string pdfContext = "";

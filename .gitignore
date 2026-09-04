@@ -483,3 +483,6 @@ $RECYCLE.BIN/
 
 #PDF data
 Data/pdfs/
+
+# RAG cache
+Data/cache/

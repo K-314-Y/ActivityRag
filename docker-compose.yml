@@ -1,7 +1,9 @@
 services:
-  activityRAG:
+  activityrag:
     build: .
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_CHAT_MODEL: ${OPENAI_CHAT_MODEL}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL}
     volumes:
       - ./Data:/app/Data
