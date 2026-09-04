@@ -1,0 +1,7 @@
+services:
+  activityRAG:
+    build: .
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    volumes:
+      - ./Data:/app/Data
